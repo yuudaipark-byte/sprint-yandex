@@ -34,28 +34,28 @@ func parseTraining(data string) (int, string, time.Duration, error) {
 }
 
 func distance(steps int, height float64) float64 {
-	return float64(steps) * height * stepCoefficient
+	return float64(steps) * height * stepCoefficient / mInKm
 }
 
 func meanSpeed(steps int, height float64, duration time.Duration) float64 {
-	if steps <= 0 || duration <= 0 {
+	if duration <= 0 || steps <= 0 {
 		return 0
 	}
-	return distance(steps, height) / mInKm / duration.Hours()
+	return distance(steps, height) / duration.Hours()
 }
 
 func RunningSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
 	if steps <= 0 || weight <= 0 || height <= 0 || duration <= 0 {
 		return 0, errors.New("некорректные данные")
 	}
-	return weight * meanSpeed(steps, height, duration), nil
+	return weight * meanSpeed(steps, height, duration) * duration.Hours(), nil
 }
 
 func WalkingSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
 	if steps <= 0 || weight <= 0 || height <= 0 || duration <= 0 {
 		return 0, errors.New("некорректные данные")
 	}
-	return weight * meanSpeed(steps, height, duration) * walkingCoefficient, nil
+	return weight * meanSpeed(steps, height, duration) * duration.Hours() * walkingCoefficient, nil
 }
 
 func TrainingInfo(data string, weight, height float64) (string, error) {
@@ -82,7 +82,7 @@ func TrainingInfo(data string, weight, height float64) (string, error) {
 		"Тип тренировки: %s\nДлительность: %.2f ч.\nДистанция: %.2f км.\nСкорость: %.2f км/ч\nСожгли калорий: %.2f\n",
 		activity,
 		duration.Hours(),
-		distance(steps, height)/mInKm,
+		distance(steps, height),
 		meanSpeed(steps, height, duration),
 		calories,
 	), nil
